@@ -2,6 +2,14 @@ My name is Rishaan Kapoor.
 
 I am a student engineering that loves rockets, planes, and drones.
 
-Projects:
+Major Projects:
 
-Blackbox analyzer: I built a tool to help me decode my drone flights. On every flight the drone takes logs of critical information, and I built a decoder because other public analyzers didn't give me the information I needed for my research.
+Blackbox analyzer: 
+Open source FPV blackbox data analyzer.
+https://github.com/MTMAG11/blackbox-analyzer
+
+FPV Drone:
+A custom 5-inch FPV quadcopter I built in March-July 2026.
+
+Model Rocketry:
+Designing and building custon model rockets.
