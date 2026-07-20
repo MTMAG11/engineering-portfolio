@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accurate Metronome</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #111;
+      color: #fff;
+    }
+    .container {
+      text-align: center;
+      max-width: 300px;
+      width: 100%;
+    }
+    input {
+      width: 100%;
+      margin: 10px 0;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+    }
+    .pulse {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #444;
+      margin: 20px auto;
+    }
+    .pulse.active {
+      background: #0f0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Metronome</h1>
+    <div id="bpmDisplay">120 BPM</div>
+    <input type="range" id="bpm" min="30" max="300" value="120" />
+    <button id="toggle">Start</button>
+    <div class="pulse" id="pulse"></div>
+  </div>
+
+  <script>
+    let audioCtx;
+    let isRunning = false;
+    let bpm = 120;
+    let nextNoteTime = 0;
+    let beatCount = 0;
+    const lookahead = 25; // ms
+    const scheduleAheadTime = 0.1; // sec
+    let timerID;
+
+    const bpmSlider = document.getElementById('bpm');
+    const bpmDisplay = document.getElementById('bpmDisplay');
+    const toggleBtn = document.getElementById('toggle');
+    const pulse = document.getElementById('pulse');
+
+    bpmSlider.oninput = () => {
+      bpm = parseInt(bpmSlider.value);
+      bpmDisplay.textContent = bpm + ' BPM';
+    };
+
+    function clickSound(time, isAccent = false) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.frequency.value = isAccent ? 1600 : 1000;
+      gain.gain.setValueAtTime(1, time);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(time);
+      osc.stop(time + 0.05);
+    }
+
+    function scheduler() {
+      while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
+        const isAccent = beatCount === 0;
+        clickSound(nextNoteTime, isAccent);
+        visualPulse(nextNoteTime, isAccent);
+        nextNoteTime += 60 / bpm;
+        beatCount = (beatCount + 1) % 4; // 4/4 time
+      }
+    }
+    }
+
+    function visualPulse(time, isAccent = false) {
+      const delay = (time - audioCtx.currentTime) * 1000;
+      setTimeout(() => {
+        pulse.classList.add('active');
+        if (isAccent) pulse.style.background = '#f00';
+        setTimeout(() => {
+          pulse.classList.remove('active');
+          pulse.style.background = '#0f0';
+        }, 50);
+      }, delay);
+    }, delay);
+    }
+
+    toggleBtn.onclick = () => {
+      if (!audioCtx) audioCtx = new AudioContext();
+
+      if (!isRunning) {
+        nextNoteTime = audioCtx.currentTime + 0.05;
+        beatCount = 0;
+        timerID = setInterval(scheduler, lookahead);
+        toggleBtn.textContent = 'Stop';
+        isRunning = true;
+      } else {
+        clearInterval(timerID);
+        toggleBtn.textContent = 'Start';
+        isRunning = false;
+      }
+    };
+  </script>
+</body>
+</html>
