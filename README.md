@@ -12,4 +12,4 @@ FPV Drone:
 A custom 5-inch FPV quadcopter I built in March-July 2026.
 
 Model Rocketry:
-Designing and building custon model rockets.
+Designing and building custom model rockets.
