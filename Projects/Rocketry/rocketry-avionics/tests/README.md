@@ -1,5 +1,4 @@
-Rocketry Avionics Hardware
-
+This is where I conduct all of the tests on my avionics
 Flight Computer:
 ESP32 Dev Board
 
