@@ -13,7 +13,7 @@ void setup() {
 
   Serial.println("SD Test");
 
-  SPI.begin(SD_SCK, SD_MISO, SD_MOSI, SD_CS);
+  SPI.begin();
 
   if(!SD.begin(SD_CS)) {
 
