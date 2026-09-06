@@ -1,8 +1,10 @@
-#include "FS.h"
-#include "SD.h"
-#include "SPI.h"
+#include <SPI.h>
+#include <SD.h>
 
-#define SD_CS 15
+#define SD_CS   5
+#define SD_SCK  18
+#define SD_MISO 19
+#define SD_MOSI 23
 
 void setup() {
   Serial.begin(115200);
@@ -10,19 +12,14 @@ void setup() {
 
   Serial.println("Starting...");
 
-  if (!SD.begin(SD_CS)) {
+  SPI.begin(SD_SCK, SD_MISO, SD_MOSI, SD_CS);
+
+  if (!SD.begin(SD_CS, SPI, 1000000)) {
     Serial.println("SD init failed");
     return;
   }
 
   Serial.println("SD OK");
-
-  uint8_t cardType = SD.cardType();
-
-  if (cardType == CARD_NONE) {
-    Serial.println("No card");
-    return;
-  }
 
   Serial.print("Card size: ");
   Serial.print(SD.cardSize() / (1024 * 1024));
@@ -36,10 +33,11 @@ void setup() {
   }
 
   file.println("Hello from ESP32");
+
   file.close();
 
   Serial.println("Write successful");
-
 }
 
-void loop() {}
+void loop() {
+}
