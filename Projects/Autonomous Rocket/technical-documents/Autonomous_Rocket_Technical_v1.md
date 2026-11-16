@@ -113,3 +113,74 @@ I'm keeping the more detailed tracking stuff, like decision history, the risk li
 ---
 
 *I expect this to go out of date fairly fast, and that's fine. I'll update the relevant section whenever something real actually changes, not on a fixed schedule.*
+
+
+---
+
+# Status Update — November 16, 2026
+
+This section updates the project status where the earlier September snapshot is now out of date. It does not erase the original decision history or imply that software features have been validated on a real rocket.
+
+## Simulator status
+
+The current simulator repository is `MTMAG11/rocket-simulator`, with local path previously used as `C:\\Github\\rocket-simulator`. The latest visible commit at this snapshot is `e05f4e99b3e98f62a692ce2167862d8fd88fe865` (`V1.2.1`), dated October 9, 2026.
+
+The current repository is substantially beyond the basic 1-D simulator described in the original status section. The README and codebase document:
+
+- 1-D, 3-DOF, and 6-DOF simulation fidelity levels.
+- Component-based vehicle configuration and derived mass properties.
+- Aerodynamic model interfaces for drag, lift, and pitching moment.
+- TVC and control-fin actuator models.
+- Simulated sensors, a linear Kalman filter, and controller interfaces.
+- Separation of truth, measurements, estimates, commands, and actual actuator state.
+- HIL protocol and loopback/pipe/record-replay foundations.
+- Motor library support and ThrustCurve.org discovery.
+- Reproducible Monte Carlo dataset generation.
+- A real-flight validation registry and validation workflow.
+
+This is software capability, not proof that the complete autonomous flight system exists. In particular, the estimator is a linear Kalman filter rather than an EKF, and HIL has not been validated against connected flight hardware.
+
+## Simulator validation status
+
+The repository's validation documentation reports seven real-flight comparisons in the 7–24 kg range. The two holdout flights have a reported apogee RMS error of 5.54% (Erebus 11: -6.40%; Cavour: +4.52%). This is a small validation set and should not be presented as broad proof of accuracy.
+
+Known gaps include:
+
+- No documented real-flight validation for rockets under 1 kg.
+- No supersonic validation.
+- No real-hardware validation of the vehicle, actuator, sensor, estimator, or HIL models.
+- Some flight inputs are reconstructed or based on secondary sources.
+- The proposed global drag multiplier of 0.957 was not adopted because it did not improve holdout RMS.
+
+Preserve the development/calibration/holdout split. Do not tune against holdout results and continue describing them as independent holdouts.
+
+## Avionics and mechanical packaging status
+
+The existing V1 flight-computer setup is the starting point for the next avionics stage. The current packaging task is an inert mechanical fit-check, not a flight-ready assembly.
+
+Current fit-check constraints:
+
+- Internal diameter: 1.25 in.
+- Available length: 5.5 in.
+- Current electronics arrangement: breadboard.
+- 3D printing is available for a fit-check part.
+
+The intended next step is to create a Fusion 360 layout using actual dimensions for the ESP32 board, BMP388, ICM42688-P, SD-card module, connectors, mounting features, and wiring. Include cable bend/clearance and assembly access; matching the nominal board outline alone is not enough. The CAD fit-check is not confirmed complete as of this update.
+
+Historical avionics notes list the ESP32 XH-32S, BMP388 at I2C address `0x77`, ICM42688-P at `0x69` in the successful manual-read test, SDA 21/SCL 22, and SD pins CS 5/SCK 18/MISO 19/MOSI 23 at 1 MHz. These are historical configuration notes; verify the actual current board, wiring, library versions, and sensor addresses before relying on them.
+
+## Current priorities
+
+1. Finish the inert Fusion 360 fit-check using measured component and connector dimensions.
+2. Check the layout against the 1.25 in ID and 5.5 in available length, including wiring and mounting clearance.
+3. Print and test a simple fit-check part before treating the packaging as resolved.
+4. Reconcile the local simulator checkout with GitHub and run the documented tests before choosing further simulator work.
+5. Keep software simulation, bench-tested avionics, HIL, and actual flight validation as separate evidence categories.
+
+## Evidence and unknowns
+
+Verified from the GitHub simulator repository: architecture, documented features, version identifiers, latest visible commit, and validation documentation.
+
+Known from project discussion: the V1 flight-computer setup is the starting point; the inert fit-check envelope and breadboard arrangement are the current mechanical constraints.
+
+Not confirmed: completion of the CAD model, successful printed fit-check, current sensor/SD test results, current local simulator test status, or any new flight data.
