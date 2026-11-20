@@ -1,76 +1,85 @@
+
+#include <Arduino.h>
 #include <Wire.h>
 #include "ICM42688.h"
 
-#define SDA_PIN 21
-#define SCL_PIN 22
+ICM42688 IMU(Wire, 0x69);
 
-ICM42688 IMU(Wire, 0x68);
-
+unsigned long startTime = 0;
+unsigned long totalReads = 0;
+unsigned long failedReads = 0;
+bool imuReady = false;
+bool finished = false;
 
 void setup() {
-
   Serial.begin(115200);
+  delay(1000);
 
-  delay(5000);
+  Wire.begin(21, 22);
+  Wire.setClock(100000);
 
-  Wire.begin(SDA_PIN, SCL_PIN);
-
-
-  Serial.println("Starting ICM42688...");
-
+  Serial.println();
+  Serial.println("=== ICM-42688 60-Second Reliability Test ===");
 
   int status = IMU.begin();
 
+  Serial.print("IMU begin status: ");
+  Serial.println(status);
 
-  if (status < 0) {
-
-    Serial.println("IMU initialization unsuccessful");
-
-    Serial.print("Status: ");
-    Serial.println(status);
-
-    while (1);
-
+  if (status != 1) {
+    Serial.println("FAIL: Initialization unsuccessful.");
+    return;
   }
 
+  imuReady = true;
+  startTime = millis();
 
-  Serial.println("IMU connected!");
-
-  Serial.println("ax,ay,az,gx,gy,gz,temp_C");
-
+  Serial.println("Testing... keep the board stationary.");
 }
 
-
-
 void loop() {
+  if (!imuReady || finished) {
+    delay(100);
+    return;
+  }
 
+  int result = IMU.getAGT();
+  totalReads++;
 
-  IMU.getAGT();
+  if (result < 0) {
+    failedReads++;
+  }
 
+  unsigned long elapsed = millis() - startTime;
 
-  Serial.print(IMU.accX(), 6);
-  Serial.print("\t");
+  if (elapsed >= 60000) {
+    finished = true;
 
-  Serial.print(IMU.accY(), 6);
-  Serial.print("\t");
+    Serial.println();
+    Serial.println("=== TEST RESULTS ===");
 
-  Serial.print(IMU.accZ(), 6);
-  Serial.print("\t");
+    Serial.print("Duration (ms): ");
+    Serial.println(elapsed);
 
+    Serial.print("Total reads: ");
+    Serial.println(totalReads);
 
-  Serial.print(IMU.gyrX(), 6);
-  Serial.print("\t");
+    Serial.print("Failed reads: ");
+    Serial.println(failedReads);
 
-  Serial.print(IMU.gyrY(), 6);
-  Serial.print("\t");
+    Serial.print("Successful reads: ");
+    Serial.println(totalReads - failedReads);
 
-  Serial.print(IMU.gyrZ(), 6);
-  Serial.print("\t");
+    float errorPercent = totalReads > 0
+      ? 100.0f * failedReads / totalReads
+      : 0.0f;
 
+    Serial.print("Error rate (%): ");
+    Serial.println(errorPercent, 2);
 
-  Serial.println(IMU.temp(), 6);
+    Serial.println("Test complete.");
+    return;
+  }
 
-
-  delay(100);
-
+  delay(20);
 }
